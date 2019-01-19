@@ -51,23 +51,25 @@ It is primarily designed as an _in memory_ message queue, but messages can be wr
 - [NSQ Design](https://nsq.io/overview/design.html)
 - [NSQ Topology Patterns](https://nsq.io/deployment/topology_patterns.html)
 - [NSQ FAQ](https://nsq.io/overview/faq.html)
-- [NSQ Golang Meetup](https://speakerdeck.com/snakes/nsq-nyc-golang-meetup)
+- [NSQ Golang Meetup Slides](https://speakerdeck.com/snakes/nsq-nyc-golang-meetup)
 
 ## Running Locally
 
-Start `nsqlookupd`, `nsqd` and `nsqadmin` by running:
+### Starting/Stopping all NSQ Services
+
+1. Start `nsqlookupd`, `nsqd` and `nsqadmin` by running:
 
 ```
 > docker-compose up -d
 ```
 
-Check if it's up:
+2. Check if it's up:
 
 ```
 > docker-compose ps
 ```
 
-Ping `nsqd`:
+3. Ping `nsqd`:
 
 ```
 > curl http://127.0.0.1:4151/ping
@@ -75,7 +77,7 @@ Ping `nsqd`:
 OK
 ```
 
-To stop all containers and clean up run:
+4. To stop all containers and clean up run:
 
 ```
 docker-compose down
@@ -87,18 +89,41 @@ The Admin interface can then be used by opening a browser at [http://127.0.0.1:4
 
 ### Logs
 
-NSQ writes logs to `/tmp` and logs from the running containers can be viewed with:
+Logs from the running containers can be viewed with:
 
 ```
 > docker-compose logs
 ```
 
-### Publish
+### Pub/Sub Messages Locally
 
-To publish an initial message and create a topic run:
+1. Make sure all NSQ services are running.
+
+2. Run the consumer in a separate shell:
 
 ```
-> curl -d 'hello world 1' 'http://127.0.0.1:4151/pub?topic=test'
+> go run consumer.go
+
+2019/01/19 17:52:38 INF    1 [test_topic/test_channel] (127.0.0.1:4150) connecting to nsqd
+2019/01/19 17:52:38 waiting for msgs..
+```
+
+3. Publish a message to `test_topic`:
+
+```
+> curl -d 'hello world 1' 'http://127.0.0.1:4151/pub?topic=test_topic'
 
 OK
 ```
+
+The first published message will also create the topic. Note that the topic name must match the `topicName` constant in `consumer.go`. Additionaly the consumer in `consumer.go` also creates a channel with the name specified by the `chName` constant.
+
+All published messages will be printed to shell that runs `consumer.go`:
+
+```
+2019/01/19 17:52:38 INF    1 [TEST_TOPIC/TEST_CHANNEL] (127.0.0.1:4150) connecting to nsqd
+2019/01/19 17:52:38 waiting for msgs..
+2019/01/19 17:52:38 msg hello world 1
+```
+
+Addition message stats can be viewed in the [Admin UI](http://127.0.0.1:4171/topics/test_topic/test_channel).
