@@ -52,3 +52,53 @@ It is primarily designed as an _in memory_ message queue, but messages can be wr
 - [NSQ Topology Patterns](https://nsq.io/deployment/topology_patterns.html)
 - [NSQ FAQ](https://nsq.io/overview/faq.html)
 - [NSQ Golang Meetup](https://speakerdeck.com/snakes/nsq-nyc-golang-meetup)
+
+## Running Locally
+
+Start `nsqlookupd`, `nsqd` and `nsqadmin` by running:
+
+```
+> docker-compose up -d
+```
+
+Check if it's up:
+
+```
+> docker-compose ps
+```
+
+Ping `nsqd`:
+
+```
+> curl http://127.0.0.1:4151/ping
+
+OK
+```
+
+To stop all containers and clean up run:
+
+```
+docker-compose down
+```
+
+### Admin UI
+
+The Admin interface can then be used by opening a browser at [http://127.0.0.1:4171](http://127.0.0.1:4171).
+
+### Logs
+
+NSQ writes logs to `/tmp` and logs from the running containers can be viewed with:
+
+```
+> docker-compose logs
+```
+
+### Publish
+
+To publish an initial message and create a topic run:
+
+```
+> curl -d 'hello world 1' 'http://127.0.0.1:4151/pub?topic=test'
+
+OK
+```
